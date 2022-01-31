@@ -45,4 +45,5 @@ def parse(query):
     return query
 
 if __name__ == '__main__':
-    dnsbl(loop=1)
+    sys.argv.append(str(sys.maxsize))  # default
+    dnsbl(loop=int(sys.argv[1]))
