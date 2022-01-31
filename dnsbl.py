@@ -44,18 +44,21 @@ def short(number):
         return struct.unpack('>H', number)[0]
 
 def parse_name(query):
-    '''
+    r'''
     return hostname if Internet host address specified
+
+    >>> query=b'\x07example\x03net\x00\x00\x01\x00\x01\x00\x00'
+    >>> parse_name(query)
+    'example.net'
     '''
-    count = -1  # artificially set to nonzero for while loop
-    offset = 0
+    count = offset = 0
     name = []
-    while count != 0:
+    while query[offset] != 0:
         count = query[offset]
         name.append(query[offset + 1:offset + 1 + count].decode())
         offset += count + 1
-    querytype = short(query[offset:offset + 2])
-    queryclass = short(query[offset + 2:offset + 4])
+    querytype = short(query[offset + 1:offset + 3])
+    queryclass = short(query[offset + 3:offset + 5])
     logging.debug('name: %s, type: %d, class: %d', name, querytype, queryclass)
     return '.'.join(name) if querytype == queryclass == 1 else None
 
