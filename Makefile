@@ -2,7 +2,7 @@ DNSBL_HOST ?= ::1
 DNSBL_PORT ?= 5353
 sources := $(wildcard *.py)
 export
-test:	dnsbl.py
+test:	dnsbl.py lint doctests
 	sudo which ngrep  # force typing sudo password here if necessary
 	sudo timeout 6 ngrep -e -x -dlo . port $(DNSBL_PORT) &
 	sleep 1  # give ngrep time to start up
