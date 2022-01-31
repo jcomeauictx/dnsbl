@@ -1,5 +1,10 @@
+DNSBL_HOST ?= ::1
+DNSBL_PORT ?= 5353
+export
 test:	dnsbl.py
-	sudo ngrep -e -x -dlo . port 5353 &
-	./$< &
-	dig example.net -p 5353 @localhost
-	kill -1
+	sudo which ngrep  # force typing sudo password here if necessary
+	timeout 6 sudo ngrep -e -x -dlo . port $(DNSBL_PORT) &
+	sleep 1  # give ngrep time to start up
+	timeout 5 ./$< &
+	sleep 1  # give dnsbl.py time to start up
+	dig example.net -p $(DNSBL_PORT) @$(DNSBL_HOST) +tries=1

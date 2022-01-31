@@ -7,11 +7,12 @@ from collections import defaultdict
 
 DEFAULT_DIRECTORY = os.path.join('', 'var', 'dnsbl')
 DNSBL_DIRECTORY = os.getenv('DNSBL_DIRECTORY', DEFAULT_DIRECTORY)
+DNSBL_HOST = os.getenv('DNSBL_HOST', '::1')
 DNSBL_PORT = int(os.getenv('DNSBL_PORT', '5353'))
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 
-def dnsbl(directory=DNSBL_DIRECTORY, port=DNSBL_PORT, loop=sys.maxsize):
+def dnsbl(loop=sys.maxsize):
     '''
     Listen for queries and return valid response or NXDOMAIN if not found
 
@@ -19,13 +20,15 @@ def dnsbl(directory=DNSBL_DIRECTORY, port=DNSBL_PORT, loop=sys.maxsize):
     https://pythontic.com/modules/socket/udp-client-server-example
     '''
     with socket.socket(socket.AF_INET6, socket.SOCK_DGRAM) as server:
-        server.bind(('::1', port))
+        server.bind((DNSBL_HOST, DNSBL_PORT))
         logging.debug('DNSBL listening...')
         while loop > 0:
+            logging.debug('%d loops remaining', loop)
             query, address = server.recvfrom(512)
             logging.debug('query: %r, parsed: %r, from %s',
                           query, parse(query), address)
             loop -= 1
+        logging.debug('dnsbl server exiting')
 
 def parse(query):
     '''
@@ -42,4 +45,4 @@ def parse(query):
     return query
 
 if __name__ == '__main__':
-    dnsbl(loop=3)
+    dnsbl(loop=1)
