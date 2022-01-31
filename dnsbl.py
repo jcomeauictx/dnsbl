@@ -8,6 +8,9 @@ DEFAULT_DIRECTORY = os.path.join('', 'var', 'dnsbl')
 DNSBL_DIRECTORY = os.getenv('DNSBL_DIRECTORY', DEFAULT_DIRECTORY)
 DNSBL_HOST = os.getenv('DNSBL_HOST', '::1')
 DNSBL_PORT = int(os.getenv('DNSBL_PORT', '5353'))
+STANDARD = 0x100  # standard query
+DNSSEC = 0x20
+EXPECTED = STANDARD | DNSSEC
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 
@@ -62,6 +65,21 @@ def parse_name(query):
     logging.debug('name: %s, type: %d, class: %d', name, querytype, queryclass)
     return '.'.join(name) if querytype == queryclass == 1 else None
 
+def standard(flags):
+    '''
+    Check if standard query
+
+    >>> standard(0x101)
+    False
+    >>> standard(0x120)
+    True
+    >>> standard(0x100)
+    True
+    >>> standard(0x80)
+    False
+    '''
+    return flags & ~EXPECTED == 0 and flags & EXPECTED in [STANDARD, EXPECTED]
+
 def parse(query):
     '''
     Strip header off query and return the parts
@@ -77,7 +95,7 @@ def parse(query):
                   txid, flags, questions)
     logging.debug('answers: %d, authority: %d, additional: %d',
                   answers, authority, additional)
-    return parse_name(query)
+    return parse_name(query) if standard(flags) else None
 
 if __name__ == '__main__':
     sys.argv.append(str(sys.maxsize))  # default
