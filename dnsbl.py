@@ -31,10 +31,25 @@ def dnsbl(loop=sys.maxsize):
         while loop > 0:
             logging.debug('%d loops remaining', loop)
             query, address = server.recvfrom(512)
+            parsed, txid = parse(query)
             logging.debug('query: %r, parsed: %r, from %s',
-                          query, parse(query), address)
+                          query, parsed, address)
+            server.sendto(reply(txid, parsed), 0, address)
             loop -= 1
         logging.debug('dnsbl server exiting')
+
+def reply(txid, lookup):
+    '''
+    reply to address with 127.0.0.2 or NXDomain
+    '''
+    response = short(txid)  # will contain txid in any case
+    path = os.path.join(DNSBL_DIRECTORY, lookup) if lookup else None
+    if path and os.path.exists(path):
+        response += short(0x8180)  # good answer
+    else:
+        response += short(0x8183)  # NXDomain
+    return response
+
 
 def ipaddress(host):
     r'''
@@ -128,7 +143,7 @@ def parse(query):
                   txid, flags, questions)
     logging.debug('answers: %d, authority: %d, additional: %d',
                   answers, authority, additional)
-    return parse_name(query) if standard(flags) else None
+    return parse_name(query) if standard(flags) else None, txid
 
 if __name__ == '__main__':
     sys.argv.append(str(sys.maxsize))  # default
