@@ -43,6 +43,22 @@ def short(number):
     except struct.error:
         return struct.unpack('>H', number)[0]
 
+def parse_name(query):
+    '''
+    return hostname if Internet host address specified
+    '''
+    count = -1  # artificially set to nonzero for while loop
+    offset = 0
+    name = []
+    while count != 0:
+        count = query[offset]
+        name.append(query[offset + 1:offset + 1 + count].decode())
+        offset += count + 1
+    querytype = short(query[offset:offset + 2])
+    queryclass = short(query[offset + 2:offset + 4])
+    logging.debug('name: %s, type: %d, class: %d', name, querytype, queryclass)
+    return '.'.join(name) if querytype == queryclass == 1 else None
+
 def parse(query):
     '''
     Strip header off query and return the parts
@@ -58,7 +74,7 @@ def parse(query):
                   txid, flags, questions)
     logging.debug('answers: %d, authority: %d, additional: %d',
                   answers, authority, additional)
-    return query
+    return parse_name(query)
 
 if __name__ == '__main__':
     sys.argv.append(str(sys.maxsize))  # default
