@@ -1,5 +1,6 @@
 DNSBL_HOST ?= ::1
 DNSBL_PORT ?= 5353
+sources := $(wildcard *.py)
 export
 test:	dnsbl.py
 	sudo which ngrep  # force typing sudo password here if necessary
@@ -8,3 +9,9 @@ test:	dnsbl.py
 	timeout 5 ./$< 1 &
 	sleep 1  # give dnsbl.py time to start up
 	dig example.net -p $(DNSBL_PORT) @$(DNSBL_HOST) +tries=1
+%.lint: %.py
+	pylint3 $<
+lint: $(sources:.py=.lint)
+%.doctest: %.py
+	python3 -m doctest $<
+doctests: $(sources:.py=.doctest)
