@@ -49,6 +49,9 @@ def reply(txid, lookup):
         # one question, one answer, no authority, no additional
         response += short(0x1) + short(0x1) + short(0) + short(0)
         response += dnsname(lookup)
+        # type 1 ('A', host address), class 1 (IN, Internet address),
+        # offset (0xc0) to 1st byte of name (0x0c, 12 bytes into record)
+        response += short(0x1) + short(0x1) + short(0xc00c)
     else:
         response += short(0x8183)  # NXDomain
     return response
@@ -121,10 +124,11 @@ def dnsname(host_name):
     turn host name into DNS format
 
     >>> dnsname('abcdef.com')
-    b'\x06abcdef\x03com'
+    b'\x06abcdef\x03com\x00'
     '''
-    parts = host_name.encode().split(b'.')
-    lengths = [len(s) for s in parts]
+    # add empty (0-byte) segment at end
+    parts = host_name.encode().split(b'.') + [b'']
+    lengths = [len(s) for s in parts] + [0]
     return b''.join([bytes([lengths[i]]) + parts[i] for i in range(len(parts))])
 
 def standard(flags):
