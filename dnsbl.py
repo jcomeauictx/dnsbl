@@ -46,6 +46,9 @@ def reply(txid, lookup):
     path = os.path.join(DNSBL_DIRECTORY, lookup) if lookup else None
     if path and os.path.exists(path):
         response += short(0x8180)  # good answer
+        # one question, one answer, no authority, no additional
+        response += short(0x1) + short(0x1) + short(0) + short(0)
+        response += dnsname(lookup)
     else:
         response += short(0x8183)  # NXDomain
     return response
@@ -112,6 +115,17 @@ def parse_name(query):
     queryclass = short(query[offset + 3:offset + 5])
     logging.debug('name: %s, type: %d, class: %d', name, querytype, queryclass)
     return '.'.join(name) if querytype == queryclass == 1 else None
+
+def dnsname(host_name):
+    r'''
+    turn host name into DNS format
+
+    >>> dnsname('abcdef.com')
+    b'\x06abcdef\x03com'
+    '''
+    parts = host_name.encode().split(b'.')
+    lengths = [len(s) for s in parts]
+    return b''.join([bytes([lengths[i]]) + parts[i] for i in range(len(parts))])
 
 def standard(flags):
     '''
