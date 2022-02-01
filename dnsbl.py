@@ -48,7 +48,7 @@ def reply(txid, lookup):
     if path and os.path.exists(path):
         response += network(0x8180)  # good answer
         # one question, one answer, no authority, no additional
-        response += network(1) + network(1) + network(0) + network(0)
+        response += network(1) * 2 + network(0) * 2
         response += dnsname(lookup)
         # type 1 ('A', host address), class 1 (IN, Internet address),
         # offset (0xc0) to 1st byte of name (0x0c, 12 bytes into record)
@@ -58,6 +58,10 @@ def reply(txid, lookup):
         response += network(4) + SPAMMER
     else:
         response += network(0x8183)  # NXDomain
+        # one question, no answers, no authority, no additional
+        response += network(1) + network(0) * 3
+        # name, type, class
+        response += dnsname(lookup) + network(1) * 2
     return response
 
 def ipaddress(host):
