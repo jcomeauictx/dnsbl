@@ -15,6 +15,7 @@ PATTERN = re.compile(r'^(\d+\.\d+\.\d+\.\d+)\.%s$' % DNSBL_DOMAIN_PATTERN)
 STANDARD = 0x100  # standard query
 DNSSEC = 0x20
 EXPECTED = STANDARD | DNSSEC
+SPAMMER = bytes([127, 0, 0, 2])  # code for unspecified spamming address
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 
@@ -42,20 +43,22 @@ def reply(txid, lookup):
     '''
     reply to address with 127.0.0.2 or NXDomain
     '''
-    response = short(txid)  # will contain txid in any case
+    response = network(txid)  # will contain txid in any case
     path = os.path.join(DNSBL_DIRECTORY, lookup) if lookup else None
     if path and os.path.exists(path):
-        response += short(0x8180)  # good answer
+        response += network(0x8180)  # good answer
         # one question, one answer, no authority, no additional
-        response += short(0x1) + short(0x1) + short(0) + short(0)
+        response += network(1) + network(1) + network(0) + network(0)
         response += dnsname(lookup)
         # type 1 ('A', host address), class 1 (IN, Internet address),
         # offset (0xc0) to 1st byte of name (0x0c, 12 bytes into record)
-        response += short(0x1) + short(0x1) + short(0xc00c)
+        response += network(1) + network(1) + network(0xc00c)
+        # type, class, ttl, data length, data
+        response += network(1) + network(1) + network(0x00113355, 'long')
+        response += network(4) + SPAMMER
     else:
-        response += short(0x8183)  # NXDomain
+        response += network(0x8183)  # NXDomain
     return response
-
 
 def ipaddress(host):
     r'''
@@ -86,19 +89,20 @@ def hostname(ip_address):
     '''
     return '.'.join((reverse(ip_address), DNSBL_DOMAIN))
 
-def short(number):
+def network(number, size='short'):
     r'''
-    convert number from network short to int and vice versa
+    convert number from network short or long to int and vice versa
 
-    >>> short(b'\x00\x01')
+    >>> network(b'\x00\x01')
     1
-    >>> short(1)
+    >>> network(1)
     b'\x00\x01'
     '''
+    formatter = '>H' if size == 'short' else '>L'
     try:
-        return struct.pack('>H', number)
+        return struct.pack(formatter, number)
     except struct.error:
-        return struct.unpack('>H', number)[0]
+        return struct.unpack(formatter, number)[0]
 
 def parse_name(query):
     r'''
@@ -114,8 +118,8 @@ def parse_name(query):
         count = query[offset]
         name.append(query[offset + 1:offset + 1 + count].decode())
         offset += count + 1
-    querytype = short(query[offset + 1:offset + 3])
-    queryclass = short(query[offset + 3:offset + 5])
+    querytype = network(query[offset + 1:offset + 3])
+    queryclass = network(query[offset + 3:offset + 5])
     logging.debug('name: %s, type: %d, class: %d', name, querytype, queryclass)
     return '.'.join(name) if querytype == queryclass == 1 else None
 
@@ -150,12 +154,12 @@ def parse(query):
     '''
     strip header off query and return the parts
     '''
-    txid = short(query[:2])
-    flags = short(query[2:4])
-    questions = short(query[4:6])
-    answers = short(query[6:8])
-    authority = short(query[8:10])
-    additional = short(query[10:12])
+    txid = network(query[:2])
+    flags = network(query[2:4])
+    questions = network(query[4:6])
+    answers = network(query[6:8])
+    authority = network(query[8:10])
+    additional = network(query[10:12])
     query = query[12:]
     logging.debug('txid: 0x%04x, flags: 0x%04x, questions: %d',
                   txid, flags, questions)
