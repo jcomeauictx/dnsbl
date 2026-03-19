@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARNING)
 
 CHUNKSIZE = 1024 * 1024
 
-def get_email(searchpattern, folder=None, *ignored):
+def get_email(searchpattern, folder=None):
     '''
     find email matching search pattern
     '''
@@ -75,4 +75,6 @@ def get_email(searchpattern, folder=None, *ignored):
         return email.decode()
 
 if __name__ == '__main__':
+    if len(sys.argv) > 2 and sys.argv[2] == 'fakespool.txt':
+        CHUNKSIZE = 16  # for testing
     print(get_email(*sys.argv[1:]))
