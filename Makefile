@@ -3,7 +3,9 @@ DNSBL_PORT ?= 5353
 DNSBL_DIRECTORY ?= /tmp/dnsbl
 PYLINT ?= pylint3
 SOURCES := $(wildcard *.py)
+PYTHON ?= $(word 1, $(shell which python3 python))
 export
+default: test.spam
 test:	dnsbl.py lint doctests
 	mkdir -p $(DNSBL_DIRECTORY)
 	touch $(DNSBL_DIRECTORY)/example.net
@@ -17,6 +19,10 @@ test:	dnsbl.py lint doctests
 	rm $(DNSBL_DIRECTORY)/example.net
 %.lint: %.py
 	$(PYLINT) $<
+test.spam: findspam.py
+	$(PYTHON) $< abc@xyz fakespool.txt
+%.spam: findspam.py
+	$(PYTHON) $< "$(@:.spam=)"
 lint: $(SOURCES:.py=.lint)
 %.doctest: %.py
 	python3 -m doctest $<
