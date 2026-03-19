@@ -1,0 +1,21 @@
+From abc@xyz
+abcdef
+
+From bcd@wxy
+bcdefg
+
+From cde@vwx
+
+cdefgh
+
+From abc@xyz
+abcdefz
+
+From bcd@wxy
+bcdefgz
+
+From cde@vwx
+
+cdefghz
+
+
