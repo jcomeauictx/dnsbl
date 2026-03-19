@@ -2,7 +2,7 @@ DNSBL_HOST ?= ::1
 DNSBL_PORT ?= 5353
 DNSBL_DIRECTORY ?= /tmp/dnsbl
 PYLINT ?= pylint3
-sources := $(wildcard *.py)
+SOURCES := $(wildcard *.py)
 export
 test:	dnsbl.py lint doctests
 	mkdir -p $(DNSBL_DIRECTORY)
@@ -17,7 +17,7 @@ test:	dnsbl.py lint doctests
 	rm $(DNSBL_DIRECTORY)/example.net
 %.lint: %.py
 	$(PYLINT) $<
-lint: $(sources:.py=.lint)
+lint: $(SOURCES:.py=.lint)
 %.doctest: %.py
 	python3 -m doctest $<
-doctests: $(sources:.py=.doctest)
+doctests: $(SOURCES:.py=.doctest)
