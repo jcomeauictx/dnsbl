@@ -30,7 +30,7 @@ def get_email(searchpattern='.', folder=None):
                 offset,
                 mailfile.tell()
             )
-        searchstart = position = mailfile.seek(0)
+            searchstart = position = mailfile.seek(0)
         endfile = position - offset
         logging.debug('position in file: %d, end: %d', position, endfile)
         while email is None:
@@ -46,9 +46,9 @@ def get_email(searchpattern='.', folder=None):
                 searchtext[:80]
             )
             # use finditer to get the *last* match
-            match = pattern.finditer(searchtext)
+            match = list(pattern.finditer(searchtext))
             if match:
-                start, end = list(match)[-1].span()
+                start, end = match[-1].span()
                 found = [position + start, position + end]
                 logging.debug(
                     'found match at offset %d: %s, snippet: %r',
