@@ -60,7 +60,7 @@ def get_email(searchpattern='.', folder=None):
                 searchstart = mailfile.seek(max(0, position - CHUNKSIZE))
                 prepend = mailfile.read(position - searchstart)
                 # reverse the start so we can find ' morF' (envelope From )
-                beginning = bytes(reversed(prepend + searchtext[:found[0]]))
+                beginning = bytes(reversed(prepend + searchtext[:found[1]]))
                 # trim searchtext to start of pattern match before appending
                 searchtext = searchtext[found[1]:] + append
                 logging.debug('searchtext length now: %d', len(searchtext))
