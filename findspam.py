@@ -9,11 +9,10 @@ logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARNING)
 
 CHUNKSIZE = 1024 * 1024
 
-def get_email(searchpattern='.', folder=None):
+def get_email(searchpattern='.', folder=None, chunksize=CHUNKSIZE):
     '''
     find email matching search pattern
     '''
-    offset = -CHUNKSIZE
     searchtext = b''
     folder = folder or os.path.join(
        os.path.sep, 'var', 'mail', pwd.getpwuid(os.geteuid()).pw_name
@@ -23,15 +22,15 @@ def get_email(searchpattern='.', folder=None):
     with open(folder, 'rb') as mailfile:
         email = None
         try:
-            searchstart = position = mailfile.seek(offset, os.SEEK_END)
+            searchstart = position = mailfile.seek(-chunksize, os.SEEK_END)
         except OSError:
             logging.error(
                 'cannot seek to end%d from %d, seeking to start instead',
-                offset,
+                -chunksize,
                 mailfile.tell()
             )
             searchstart = position = mailfile.seek(0)
-        endfile = position - offset
+        endfile = position + chunksize
         logging.debug('position in file: %d, end: %d', position, endfile)
         while email is None:
             # now seek from start
@@ -79,10 +78,10 @@ def get_email(searchpattern='.', folder=None):
                 email = beginning + searchtext
             else:
                 logging.debug('did not find match, zooming back')
-                position += offset
+                position -= chunksize
         return email.decode()
 
 if __name__ == '__main__':
     if len(sys.argv) > 2 and sys.argv[2] == 'fakespool.txt':
-        CHUNKSIZE = 16  # for testing
-    print(get_email(*sys.argv[1:]))
+        sys.argv += [16]  # chunksize for testing, if not specified
+    print(get_email(*sys.argv[1:4]))  # pass only 3 args
