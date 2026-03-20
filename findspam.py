@@ -21,7 +21,6 @@ def get_email(searchpattern='.', folder=None):
     pattern = re.compile(searchpattern.encode())
     mailstart = (re.compile(b'^From ', re.M), re.compile(b' morF$', re.M))
     with open(folder, 'rb') as mailfile:
-        # `email` is start, matchstart, matchend, end offsets in file (absolute)
         email = None
         try:
             searchstart = position = mailfile.seek(offset, os.SEEK_END)
