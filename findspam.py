@@ -13,6 +13,7 @@ def get_email(searchpattern='.', folder=None, chunksize=CHUNKSIZE):
     '''
     find email matching search pattern
     '''
+    chunksize = int(chunksize)  # in case passed from commandline
     searchtext = b''
     folder = folder or os.path.join(
        os.path.sep, 'var', 'mail', pwd.getpwuid(os.geteuid()).pw_name
