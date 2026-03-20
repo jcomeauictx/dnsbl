@@ -25,8 +25,8 @@ def get_email(searchpattern='.', folder=None, chunksize=CHUNKSIZE):
             searchstart = position = mailfile.seek(-chunksize, os.SEEK_END)
         except OSError:
             logging.error(
-                'cannot seek to end%d from %d, seeking to start instead',
-                -chunksize,
+                'cannot seek to end-%d from %d, seeking to start instead',
+                chunksize,
                 mailfile.tell()
             )
             searchstart = position = mailfile.seek(0)
@@ -35,6 +35,7 @@ def get_email(searchpattern='.', folder=None, chunksize=CHUNKSIZE):
         while email is None:
             # now seek from start
             searchstart = position = mailfile.seek(position)
+            logging.debug('new file position: %d', position)
             # keep searchtext size limited to CHUNKSIZE * 2
             searchtext = (
                 mailfile.read(CHUNKSIZE) + searchtext
