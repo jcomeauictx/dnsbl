@@ -49,20 +49,19 @@ def get_email(searchpattern='.', folder=None, chunksize=CHUNKSIZE):
             match = list(pattern.finditer(searchtext))
             if match:
                 start, end = match[-1].span()
-                found = [position + start, position + end]
                 logging.debug(
-                    'found match at offset %d: %s, snippet: %r',
-                    found[0], match,
-                    searchtext[start:end]
+                    'found match at offset %d: %s, snippet: %r %r %r',
+                    start, match, searchtext[start - 64:start],
+                    searchtext[start:end], searchtext[end:end + 64]
                 )
                 # now tack on another chunk to each end of searchtext
                 append = mailfile.read(CHUNKSIZE)
                 searchstart = mailfile.seek(max(0, position - CHUNKSIZE))
                 beginning = mailfile.read(position - searchstart)
                 # reverse the start so we can find ' morF' (envelope From )
-                beginning = bytes(reversed(beginning + searchtext[:found[1]]))
+                beginning = bytes(reversed(beginning + searchtext[:end]))
                 # trim searchtext to start of pattern match before appending
-                searchtext = searchtext[found[1]:] + append
+                searchtext = searchtext[end:] + append
                 logging.debug('searchtext length now: %d', len(searchtext))
                 # reusing `start` and `end` now as match objects
                 logging.debug(
