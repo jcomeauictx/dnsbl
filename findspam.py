@@ -23,7 +23,15 @@ def get_email(searchpattern, folder=None):
     with open(folder, 'rb') as mailfile:
         # `email` is start, matchstart, matchend, end offsets in file (absolute)
         email = None
-        searchstart = position = mailfile.seek(offset, os.SEEK_END)
+        try:
+            searchstart = position = mailfile.seek(offset, os.SEEK_END)
+        except OSError:
+            logging.error(
+                'cannot seek to end%d from %d, seeking to start instead',
+                offset,
+                mailfile.tell()
+            )
+        searchstart = position = mailfile.seek(0)
         endfile = position - offset
         logging.debug('position in file: %d, end: %d', position, endfile)
         while email is None:
