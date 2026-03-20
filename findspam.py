@@ -4,12 +4,12 @@ find and print out email matching pattern in specified email file
 
 defaults to /var/mail/$USERNAME
 '''
-import sys, os, pwd, re, logging
+import sys, os, pwd, re, logging  # pylint: disable=multiple-imports
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARNING)
 
 CHUNKSIZE = 1024 * 1024
 
-def get_email(searchpattern, folder=None):
+def get_email(searchpattern='.', folder=None):
     '''
     find email matching search pattern
     '''
