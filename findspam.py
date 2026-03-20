@@ -62,14 +62,14 @@ def get_email(searchpattern='.', folder=None):
                 # reverse the start so we can find ' morF' (envelope From )
                 beginning = bytes(reversed(prepend + searchtext[:found[0]]))
                 # trim searchtext to start of pattern match before appending
-                searchtext = searchtext[found[0]:] + append
+                searchtext = searchtext[found[1]:] + append
                 logging.debug('searchtext length now: %d', len(searchtext))
                 # reusing `start` and `end` now as match objects
                 start = mailstart[1].search(beginning)
                 end = mailstart[0].search(searchtext)
                 if end:
                     # trim again, to end of email
-                    searchtext = searchtext[:end.span()[1]].rstrip()
+                    searchtext = searchtext[:end.span()[0]].rstrip()
                 else:
                     logging.warning('end of email not found')
                 if start:
