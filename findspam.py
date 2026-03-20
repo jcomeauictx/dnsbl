@@ -57,13 +57,17 @@ def get_email(searchpattern='.', folder=None, chunksize=CHUNKSIZE):
                 # now tack on another chunk to each end of searchtext
                 append = mailfile.read(CHUNKSIZE)
                 searchstart = mailfile.seek(max(0, position - CHUNKSIZE))
-                prepend = mailfile.read(position - searchstart)
+                beginning = mailfile.read(position - searchstart)
                 # reverse the start so we can find ' morF' (envelope From )
-                beginning = bytes(reversed(prepend + searchtext[:found[1]]))
+                beginning = bytes(reversed(beginning + searchtext[:found[1]]))
                 # trim searchtext to start of pattern match before appending
                 searchtext = searchtext[found[1]:] + append
                 logging.debug('searchtext length now: %d', len(searchtext))
                 # reusing `start` and `end` now as match objects
+                logging.debug(
+                    'searching %r for %r',
+                    beginning[:64], mailstart[1].pattern
+                )
                 start = mailstart[1].search(beginning)
                 end = mailstart[0].search(searchtext)
                 if end:
@@ -84,4 +88,4 @@ def get_email(searchpattern='.', folder=None, chunksize=CHUNKSIZE):
 if __name__ == '__main__':
     if len(sys.argv) > 2 and sys.argv[2] == 'fakespool.txt':
         sys.argv += [16]  # chunksize for testing, if not specified
-    print(get_email(*sys.argv[1:4]))  # pass only 3 args
+    print(get_email(*sys.argv[1:4]))  # pass at most only 3 args
