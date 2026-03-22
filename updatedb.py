@@ -8,24 +8,27 @@ this eventually should be a 24-hour server, possibly a uwsgi script, but
 will start out as a simple script run from exim4 for every spam email
 caught by spamassassin or the existing blocklists/blacklists.
 '''
-import sys, os  # pylint: disable=multiple-imports
-from datetime import datetime
+import sys, os, logging  # pylint: disable=multiple-imports
+#from datetime import datetime
+logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 
 def updatedb(source, message_id=None):
     '''
     update database with information on spam received from source
     '''
     parts = source.split('.')
-    if all(map str.isdigit, parts):
+    if all(map(str.isdigit, parts)):
         ipnumber = network(parts)
         domainname = None
     else:
         domainname = source
         parts = reversed(parts)
         ipnumber = None
+    logging.debug('updatedb: domainname=%s, ipnumber=%s',
+                  domainname, ipnumber)
     path = os.path.join(os.curdir, 'spamdb', *parts, source)
-    os.makedirs(os.path.dirname(path), exists_ok=True)
-    with open(path, 'a') as outfile:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'a', encoding='utf-8') as outfile:
         outfile.write(message_id)
 
 def network(octets, maskbits=32):
@@ -33,9 +36,31 @@ def network(octets, maskbits=32):
     construct an integer from octets and maskbits
 
     check that the resulting number is inside the mask
+
+    >>> network([127, 0, 0, 1])
+    '127.0.0.1/32'
+    >>> network([5, 0, 0, 0], 8)
+    '5.0.0.0/8'
+    >>> network([127, 0, 0, 1], 8)
+    None
     '''
-    integers = map(int, octets)
-    reduced = int.from_bytes(integers, 'big')
+    octets = map(int, octets)
+    reduced = int.from_bytes(octets, 'big')
+    logging.debug('octets: %s, reduced: %r', octets, reduced)
+    # convert maskbits into mask
+    maskbits = ''.ljust(maskbits, '1').rjust(32 - maskbits, '0')
+    mask = int(maskbits, 2)
+    if reduced & ~mask:
+        logging.error('network address %s cannot have mask %s',
+                      ipv4(reduced), ipv4(mask))
+        return None
+    return '/'.join([ipv4(reduced), str(mask.bit_count())])
+
+def ipv4(netaddress):
+    '''
+    convert integer to dotted-quad format
+    '''
+    return '.'.join(map(str, netaddress.to_bytes(4, 'big')))
 
 if __name__ == '__main__':
     updatedb(*sys.argv[1:])

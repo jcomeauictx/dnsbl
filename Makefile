@@ -1,9 +1,10 @@
 DNSBL_HOST ?= ::1
 DNSBL_PORT ?= 5353
 DNSBL_DIRECTORY ?= /tmp/dnsbl
-PYLINT ?= pylint3
+WHICH ?= command -v
+PYLINT ?= $(word 1, $(shell $(WHICH) pylint pylint3 2>/dev/null))
 SOURCES := $(wildcard *.py)
-PYTHON ?= $(word 1, $(shell which python3 python))
+PYTHON ?= $(word 1, $(shell $(WHICH) python3 python 2>/dev/null))
 export
 default: test.spam
 test:	dnsbl.py lint doctests

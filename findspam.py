@@ -9,7 +9,9 @@ logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARNING)
 
 CHUNKSIZE = 1024 * 1024
 
-def get_email(searchpattern='.', folder=None, chunksize=CHUNKSIZE):
+def get_email(  # pylint: disable=too-many-locals
+        searchpattern='.', folder=None, chunksize=CHUNKSIZE
+    ):
     '''
     find email matching search pattern
     '''
