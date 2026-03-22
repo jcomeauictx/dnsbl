@@ -45,7 +45,7 @@ def network(octets, maskbits=32):
     '''
     octets = map(int, octets)
     reduced = int.from_bytes(octets, 'big')
-    logging.debug('octets: %s, reduced: %r', octets, reduced)
+    logging.debug('octets: %s, reduced: 0x%08x', octets, reduced)
     # convert maskbits into mask
     maskbits = ''.rjust(maskbits, '1').ljust(32, '0')
     logging.debug('maskbits: %s', maskbits)
