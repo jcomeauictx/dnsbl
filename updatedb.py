@@ -15,6 +15,9 @@ logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 def updatedb(source, message_id=None):
     '''
     update database with information on spam received from source
+
+    >>> updatedb('pixiedust.example.net', 'pixiedust.example.net fake message id')
+    >>> updatedb('240.241.242.243', '240.241.242.243 fake message id')
     '''
     parts = source.split('.')
     if all(map(str.isdigit, parts)):
