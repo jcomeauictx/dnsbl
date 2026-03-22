@@ -42,13 +42,13 @@ def network(octets, maskbits=32):
     >>> network([5, 0, 0, 0], 8)
     '5.0.0.0/8'
     >>> network([127, 0, 0, 1], 8)
-    None
     '''
     octets = map(int, octets)
     reduced = int.from_bytes(octets, 'big')
     logging.debug('octets: %s, reduced: %r', octets, reduced)
     # convert maskbits into mask
-    maskbits = ''.ljust(maskbits, '1').rjust(32 - maskbits, '0')
+    maskbits = ''.rjust(maskbits, '1').ljust(32, '0')
+    logging.debug('maskbits: %s', maskbits)
     mask = int(maskbits, 2)
     if reduced & ~mask:
         logging.error('network address %s cannot have mask %s',
