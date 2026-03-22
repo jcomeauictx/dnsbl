@@ -47,14 +47,12 @@ def network(octets, maskbits=32):
     reduced = int.from_bytes(octets, 'big')
     logging.debug('octets: %s, reduced: 0x%08x', octets, reduced)
     # convert maskbits into mask
-    maskbits = ''.rjust(maskbits, '1').ljust(32, '0')
-    logging.debug('maskbits: %s', maskbits)
-    mask = int(maskbits, 2)
+    mask = int(''.rjust(maskbits, '1').ljust(32, '0'), 2)
     if reduced & ~mask:
         logging.error('network address %s cannot have mask %s',
                       ipv4(reduced), ipv4(mask))
         return None
-    return '/'.join([ipv4(reduced), str(mask.bit_count())])
+    return '/'.join([ipv4(reduced), str(maskbits)])
 
 def ipv4(netaddress):
     '''
