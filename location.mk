@@ -1,10 +1,13 @@
 SHELL := /bin/bash
 install: /etc/init.d/location
 /etc/init.d/%: % /root/.local/bin/location.sh
-	sudo cp -i $< $@
-	sudo chmod 0744 $@
-	sudo rc-update add $* default
-	sudo rc-service $* start
+	[ -w "$(@D)" ] || (echo Must be root to install >&2; false)
+	cp -i $< $@
+	chmod 0744 $@
+	rc-update add $* default
+	rc-service $* start
 /root/.local/bin/%: %
-	sudo rm -f $@
-	sudo cp $(PWD)/$* $@
+	[ -w "$(@D)" ] || (echo Must be root to install >&2; false)
+	rm -f $@
+	cp $(PWD)/$* $@
+.PRECIOUS: /root/.local/bin/% /etc/init/%
