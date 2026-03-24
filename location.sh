@@ -4,7 +4,7 @@
 # https://medium.com/@der.loste.kitkat/get-started-with-ish-b29add1f72a3
 DEBUGGING=$1
 LOGDIR=/var
-if [ ! -w $LOGDIR ]; then LOGDIR=$HOME/$LOGDIR; fi
+if [ ! -w $LOGDIR ]; then LOGDIR=$HOME$LOGDIR; fi
 LOGDIR=$LOGDIR/location
 if [ "$DEBUGGING" ]; then echo LOGDIR=$LOGDIR >&2; fi
 mkdir -p $LOGDIR
