@@ -12,6 +12,6 @@ while read line; do
  timestamp=$(date -u --iso-8601=ns)
  date=${timestamp%%T*}
  if [ "$DEBUGGING" ]; then echo $date $timestamp $line >&2; fi
- echo $timestamp ${line%%,*} ${line##*,}
+ echo $timestamp ${line%%,*} ${line##*,} >> $LOGDIR/$date.log
  sleep 15
 done < /dev/location
