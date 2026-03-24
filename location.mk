@@ -7,7 +7,8 @@ install: /etc/init.d/location
 	rc-update add $* default
 	rc-service $* start
 /root/.local/bin/%: %
-	[ -w "$(@D)" ] || (echo Must be root to install >&2; false)
+	[ -w /root ] || (echo Must be root to install >&2; false)
 	rm -f $@
-	cp $(PWD)/$* $@
+	mkdir -p $(@D)
+	cp $* $@
 .PRECIOUS: /root/.local/bin/% /etc/init/%
