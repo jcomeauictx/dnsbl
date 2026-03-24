@@ -7,11 +7,15 @@ LOGDIR=/var
 if [ ! -w $LOGDIR ]; then LOGDIR=$HOME$LOGDIR; fi
 LOGDIR=$LOGDIR/location
 if [ "$DEBUGGING" ]; then echo LOGDIR=$LOGDIR >&2; fi
-mkdir -p $LOGDIR
+mkdir -p -m 0755 $LOGDIR
+lastseen=
 while read line; do
  timestamp=$(date -u --iso-8601=ns)
  date=${timestamp%%T*}
  if [ "$DEBUGGING" ]; then echo $date $timestamp $line >&2; fi
- echo $timestamp ${line%%,*} ${line##*,} >> $LOGDIR/$date.log
+ if [ "$line" != "$lastseen" ]; then
+  echo $timestamp ${line%%,*} ${line##*,} >> $LOGDIR/$date.log
+  lastseen=$line
+ fi
  sleep 15
 done < /dev/location
