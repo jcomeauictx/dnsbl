@@ -1,0 +1,7 @@
+#!/sbin/openrc-run
+# https://medium.com/@der.loste.kitkat/get-started-with-ish-b29add1f72a3
+description="Ensure iSH continues to run in the background"
+command="/bin/bash"
+command_args="/root/.local/bin/location.sh"
+command_background="YES"
+pidfile="/var/run/location.pid"
