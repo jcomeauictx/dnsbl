@@ -6,4 +6,5 @@ install: /etc/init.d/location
 	sudo rc-update add $* default
 	sudo rc-service $* start
 /root/.local/bin/%: %
-	sudo ln -sf $(PWD)/$* $@
+	sudo rm -f $@
+	sudo cp $(PWD)/$* $@

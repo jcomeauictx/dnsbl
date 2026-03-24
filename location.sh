@@ -5,7 +5,7 @@
 DEBUGGING=$1
 LOGDIR=/var
 if [ ! -w $LOGDIR ]; then LOGDIR=$HOME$LOGDIR; fi
-LOGDIR=$LOGDIR/location
+LOGDIR=$LOGDIR/log/location
 if [ "$DEBUGGING" ]; then echo LOGDIR=$LOGDIR >&2; fi
 mkdir -p -m 0755 $LOGDIR
 lastseen=
