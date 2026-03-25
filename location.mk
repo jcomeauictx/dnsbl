@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-install: /etc/init.d/location
+install: /etc/init.d/location | .installed/coreutils
 /etc/init.d/%: % /root/.local/bin/location.sh
 	[ -w "$(@D)" ] || (echo Must be root to install >&2; false)
 	cp -i $< $@
@@ -11,4 +11,9 @@ install: /etc/init.d/location
 	rm -f $@
 	mkdir -p $(@D)
 	cp $* $@
+.installed/coreutils: | .installed
+	apk add $(@F) || true  # don't fail on non-Alpine system
+	touch $@
+.installed:
+	mkdir $@
 .PRECIOUS: /root/.local/bin/% /etc/init/%
