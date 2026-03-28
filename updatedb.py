@@ -34,16 +34,18 @@ def updatedb(source, message_id=None):
     with open(path, 'a', encoding='utf-8') as outfile:
         outfile.write(message_id)
 
-def network(octets, maskbits=32):
+def network(octets, maskbits=32, sep='/'):
     '''
     construct an integer from octets and maskbits
 
     check that the resulting number is inside the mask
+    
+    will need to use a different sep(arator) for filenames, perhaps '.'
 
     >>> network([127, 0, 0, 1])
     '127.0.0.1/32'
-    >>> network([5, 0, 0, 0], 8)
-    '5.0.0.0/8'
+    >>> network([5, 0, 0, 0], 8, sep='.')
+    '5.0.0.0.8'
     >>> network([127, 0, 0, 1], 8)
     '''
     octets = map(int, octets)
@@ -55,7 +57,7 @@ def network(octets, maskbits=32):
         logging.error('network address %s cannot have mask %s',
                       ipv4(reduced), ipv4(mask))
         return None
-    return '/'.join([ipv4(reduced), str(maskbits)])
+    return sep.join([ipv4(reduced), str(maskbits)])
 
 def ipv4(netaddress):
     '''

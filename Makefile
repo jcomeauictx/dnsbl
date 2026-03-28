@@ -27,4 +27,4 @@ test.spam: findspam.py
 lint: $(SOURCES:.py=.lint)
 %.doctest: %.py
 	python3 -m doctest $<
-doctests: $(SOURCES:.py=.doctest)
+tests doctests: $(SOURCES:.py=.doctest)
