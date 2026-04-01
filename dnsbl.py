@@ -79,7 +79,7 @@ def ipaddress(host):
     r'''
     convert DNSBL-formatted hostname to matching IP address
 
-    >>> ipaddress('4.3.2.1.dnsbl.gnixl.com')
+    >>> ipaddress('4.3.2.1.' + DNSBL_DOMAIN)
     '1.2.3.4'
     >>> ipaddress('gnixl.com')
     '''
@@ -99,8 +99,8 @@ def hostname(ip_address):
     r'''
     convert IP address to matching DNSBL-formatted hostname
 
-    >>> hostname('1.2.3.4')
-    '4.3.2.1.dnsbl.gnixl.com'
+    >>> hostname('1.2.3.4') == '4.3.2.1.' + DNSBL_DOMAIN
+    True
     '''
     return '.'.join((reverse(ip_address), DNSBL_DOMAIN))
 
