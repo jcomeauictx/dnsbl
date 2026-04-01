@@ -6,16 +6,20 @@ import sys, os, re, socket, struct, logging  # pylint: disable=multiple-imports
 
 # pylint: disable=consider-using-f-string
 if __debug__:
-    DEFAULT_DIRECTORY = os.path.join(os.curdir, 'dnsbl')
+    DEFAULT_DIRECTORY = os.path.join(os.curdir, 'spamdb')
 else:
-    DEFAULT_DIRECTORY = os.path.join(os.path.sep, 'var', 'dnsbl')
+    DEFAULT_DIRECTORY = os.path.join(os.path.sep, 'var', 'spamdb')
+COMMAND = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 DNSBL_DIRECTORY = os.getenv('DNSBL_DIRECTORY', DEFAULT_DIRECTORY)
 DNSBL_HOST = os.getenv('DNSBL_HOST', '::1')
 DNSBL_PORT = int(os.getenv('DNSBL_PORT', '5353'))
-DNSBL_DOMAIN = os.getenv('DNSBL_DOMAIN', socket.gethostname())
+if COMMAND == 'doctest':
+    DNSBL_DOMAIN = 'dnsbl'
+else:
+    DNSBL_DOMAIN = os.getenv('DNSBL_DOMAIN', socket.gethostname())
 DNSBL_DOMAIN_ASLIST = DNSBL_DOMAIN.split('.')
 DNSBL_DOMAIN_PATTERN = DNSBL_DOMAIN.replace('.', '[.]')
-PATTERN = re.compile(r'^(\d+\.\d+\.\d+\.\d+)\.%s$' % DNSBL_DOMAIN_PATTERN)
+IP_PATTERN = re.compile(r'^(\d+\.\d+\.\d+\.\d+)')
 STANDARD = 0x100  # standard query
 DNSSEC = 0x20
 EXPECTED = STANDARD | DNSSEC
@@ -44,17 +48,32 @@ def dnsbl(loop=sys.maxsize):
             loop -= 1
         logging.debug('dnsbl server exiting')
 
+def getpath(lookup):
+    '''
+    generate path for queried name
+
+    >>> getpath('4.3.2.1.dnsbl')
+    '1/2/3/4/1.2.3.4'
+    >>> getpath('example.net.dnsbl')
+    'net/example/example.net'
+    '''
+    path = None
+    if lookup:
+        base = lookup.removesuffix('.' + DNSBL_DOMAIN)
+        backwards = reverse(base)
+        if IP_PATTERN.match(base):
+            path = (*backwards.split('.'), backwards)
+        else:
+            path = (*backwards.split('.'), base)
+        path = os.path.join(DNSBL_DIRECTORY, *path)
+    return path
+
 def reply(txid, lookup):
     '''
     reply to address with 127.0.0.2 or NXDomain
     '''
     response = network(txid)  # will contain txid in any case
-    if lookup:
-        iplookup = ipaddress(lookup)
-        if iplookup:
-            path = os.path.join(DNSBL_DIRECTORY, iplookup)
-        else:
-            path = os.path.join(DNSBL_DIRECTORY, lookup)
+    path = getpath(lookup)
     logging.debug('path: %s', path)
     if path and os.path.exists(path):
         response += network(0x8180)  # good answer
@@ -75,31 +94,22 @@ def reply(txid, lookup):
         response += dnsname(lookup) + network(1) * 2
     return response
 
-def ipaddress(host):
-    r'''
-    convert DNSBL-formatted hostname to matching IP address
-
-    >>> ipaddress('4.3.2.1.' + DNSBL_DOMAIN)
-    '1.2.3.4'
-    >>> ipaddress('gnixl.com')
-    '''
-    match = PATTERN.match(host)
-    return reverse(match.group(1)) if match else None
-
 def reverse(ip_address):
-    r'''
-    reverse octets of IP address
+    '''
+    reverse octets of IP address or parts of FQDN
 
     >>> reverse('1.2.3.4')
     '4.3.2.1'
+    >>> reverse('pixiedust.example.net')
+    'net.example.pixiedust'
     '''
     return '.'.join(reversed(ip_address.split('.')))
 
 def hostname(ip_address):
-    r'''
+    '''
     convert IP address to matching DNSBL-formatted hostname
 
-    >>> hostname('1.2.3.4') == '4.3.2.1.' + DNSBL_DOMAIN
+    >>> hostname('1.2.3.4') == '4.3.2.1.dnsbl'
     True
     '''
     return '.'.join((reverse(ip_address), DNSBL_DOMAIN))

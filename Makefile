@@ -1,6 +1,6 @@
 DNSBL_HOST ?= ::1
 DNSBL_PORT ?= 5353
-DNSBL_DIRECTORY ?= /tmp/dnsbl
+DNSBL_DIRECTORY ?=
 WHICH ?= command -v
 PYLINT ?= $(word 1, $(shell $(WHICH) pylint pylint3 2>/dev/null))
 SOURCES := $(wildcard *.py)
