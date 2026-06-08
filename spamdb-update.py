@@ -36,11 +36,11 @@ def updatedb(source, message_id=None):
 
 def network(octets, maskbits=32, sep='/'):
     '''
-    construct an integer from octets and maskbits
+    construct a network address from octets and maskbits
 
-    check that the resulting number is inside the mask
+    check that the corresponding integer is inside the mask
     
-    will need to use a different sep(arator) for filenames, perhaps '.'
+    may need to use a different sep(arator) for filenames, perhaps '.'
 
     >>> network([127, 0, 0, 1])
     '127.0.0.1/32'
@@ -62,8 +62,21 @@ def network(octets, maskbits=32, sep='/'):
 def ipv4(netaddress):
     '''
     convert integer to dotted-quad format
+
+    ipv4(1)
+    '0.0.0.1'
     '''
     return '.'.join(map(str, netaddress.to_bytes(4, 'big')))
+
+def integer(dottedquad):
+    '''
+    convert dotted-quad network address to integer
+
+    >>> hex(integer('127.0.0.1'))
+    '0x7f000001'
+    '''
+    octets = map(int, dottedquad.split('.'))
+    return int.from_bytes(octets, 'big')
 
 if __name__ == '__main__':
     updatedb(*sys.argv[1:])
