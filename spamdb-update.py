@@ -16,7 +16,7 @@ def updatedb(source, message_id=None):
     '''
     update database with information on spam received from source
 
-    >>> updatedb('pixiedust.example.net', 'pixiedust.example.net fake message id')
+    >>> updatedb('pixiedust.example.net', 'pixiedust.example.net fake msgid')
     >>> updatedb('240.241.242.243', '240.241.242.243 fake message id')
     '''
     parts = source.split('.')
@@ -33,6 +33,13 @@ def updatedb(source, message_id=None):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'a', encoding='utf-8') as outfile:
         outfile.write(message_id)
+
+def networks(octets, minbits=8, maxbits=30, sep='/'):
+    '''
+    construct all valid networks for the given address
+    '''
+    for bits in range(maxbits, minbits, -1):
+        logging.debug(network(octets, bits, sep))
 
 def network(octets, maskbits=32, sep='/'):
     '''
