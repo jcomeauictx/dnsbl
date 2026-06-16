@@ -39,17 +39,21 @@ def networks(octets, minbits=8, maxbits=30, sep='/'):
     construct all valid networks for the given address
 
     >>> networks([127, 0, 0, 1])
+    ['127.0.0.0/30', '127.0.0.0/29', '127.0.0.0/28', '127.0.0.0/27', '127.0.0.0/26', '127.0.0.0/25', '127.0.0.0/24', '127.0.0.0/23', '127.0.0.0/22', '127.0.0.0/21', '127.0.0.0/20', '127.0.0.0/19', '127.0.0.0/18', '127.0.0.0/17', '127.0.0.0/16', '127.0.0.0/15', '127.0.0.0/14', '127.0.0.0/13', '127.0.0.0/12', '127.0.0.0/11', '127.0.0.0/10', '127.0.0.0/9', '127.0.0.0/8']
     '''
     result = [
-        network(octets, bits, sep) for bits in range(maxbits, minbits, -1)]
+        network(octets, bits, sep, True)
+        for bits in range(maxbits, minbits - 1, -1)
+    ]
     logging.debug('networks: %s', networks)
     return result
 
-def network(octets, maskbits=32, sep='/'):
+def network(octets, maskbits=32, sep='/', correct=False):
     '''
     construct a network address from octets and maskbits
 
-    check that the corresponding integer is inside the mask
+    check that the corresponding integer is inside the mask (set correct=True
+    to change network address to fit)
     
     may need to use a different sep(arator) for filenames, perhaps '.'
 
@@ -65,9 +69,12 @@ def network(octets, maskbits=32, sep='/'):
     # convert maskbits into mask
     mask = int(''.rjust(maskbits, '1').ljust(32, '0'), 2)
     if reduced & ~mask:
-        logging.error('network address %s cannot have mask %s',
-                      ipv4(reduced), ipv4(mask))
-        return None
+        if not correct:
+            logging.error('network address %s cannot have mask %s',
+                          ipv4(reduced), ipv4(mask))
+            return None
+        else:
+            reduced = reduced & mask
     return sep.join([ipv4(reduced), str(maskbits)])
 
 def ipv4(netaddress):
