@@ -37,9 +37,13 @@ def updatedb(source, message_id=None):
 def networks(octets, minbits=8, maxbits=30, sep='/'):
     '''
     construct all valid networks for the given address
+
+    >>> networks([127, 0, 0, 1])
     '''
-    for bits in range(maxbits, minbits, -1):
-        logging.debug(network(octets, bits, sep))
+    result = [
+        network(octets, bits, sep) for bits in range(maxbits, minbits, -1)]
+    logging.debug('networks: %s', networks)
+    return result
 
 def network(octets, maskbits=32, sep='/'):
     '''
