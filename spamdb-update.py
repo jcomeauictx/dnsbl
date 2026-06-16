@@ -48,6 +48,16 @@ def networks(octets, minbits=8, maxbits=30, sep='/'):
     logging.debug('networks: %s', networks)
     return result
 
+def bump(octets, maskbits=32, sep='/'):
+    '''
+    return next higher network, i.e., with maskbits-1
+
+    >>> bump([192, 168, 0, 127], 32)
+    '192.168.0.124/30'
+    '''
+    bits = min(30, (maskbits - 1))
+    return network(octets, bits, sep, True)
+
 def network(octets, maskbits=32, sep='/', correct=False):
     '''
     construct a network address from octets and maskbits
