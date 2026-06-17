@@ -194,4 +194,4 @@ def parse(query):
     return parse_name(query) if standard(flags) else None, txid
 
 if __name__ == '__main__':
-    dnsbl(loop=sys.argv[1:2])
+    dnsbl(*sys.argv[1:2])
