@@ -6,7 +6,7 @@ PYLINT ?= $(word 1, $(shell $(WHICH) pylint pylint3 2>/dev/null))
 SOURCES := $(wildcard *.py)
 PYTHON ?= $(word 1, $(shell $(WHICH) python3 python 2>/dev/null))
 export
-default: test.spam
+default: test.spam run
 test:	dnsbl.py lint doctests
 	mkdir -p $(DNSBL_DIRECTORY)
 	touch $(DNSBL_DIRECTORY)/example.net
@@ -28,3 +28,5 @@ lint: $(SOURCES:.py=.lint)
 %.doctest: %.py
 	python3 -m doctest $<
 tests doctests: $(SOURCES:.py=.doctest)
+run: dnsbl.py
+	python3 $<

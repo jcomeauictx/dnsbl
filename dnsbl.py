@@ -28,13 +28,14 @@ SPAMMER = bytes([127, 0, 0, 2])  # code for unspecified spamming address
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 logging.debug('listening for queries to %s', DNSBL_DOMAIN)
 
-def dnsbl(loop=sys.maxsize):
+def dnsbl(loop=None):
     '''
     listen for queries and return valid response or NXDOMAIN if not found
 
     https://realpython.com/python-sockets/
     https://pythontic.com/modules/socket/udp-client-server-example
     '''
+    loop = int(loop) if loop else sys.maxsize  # ensure int if from sys.argv
     with socket.socket(socket.AF_INET6, socket.SOCK_DGRAM) as server:
         server.bind((DNSBL_HOST, DNSBL_PORT))
         logging.debug('DNSBL listening...')
@@ -193,5 +194,4 @@ def parse(query):
     return parse_name(query) if standard(flags) else None, txid
 
 if __name__ == '__main__':
-    sys.argv.append(str(sys.maxsize))  # default
-    dnsbl(loop=int(sys.argv[1]))
+    dnsbl(loop=sys.argv[1:2])
