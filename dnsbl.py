@@ -24,6 +24,10 @@ STANDARD = 0x100  # standard query
 DNSSEC = 0x20
 EXPECTED = STANDARD | DNSSEC
 SPAMMER = bytes([127, 0, 0, 2])  # code for unspecified spamming address
+# suspicion established by new spam from unknown IP block
+IMPLICATED = bytes([127, 0, 0, 10])  # code for suspected spamming address
+# suspicion confirmed if another spam came from the same IP block
+CONFIRMED = bytes([127, 0, 0, 11])  # code for confirmed suspicion
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.INFO)
 logging.debug('listening for queries to %s', DNSBL_DOMAIN)
