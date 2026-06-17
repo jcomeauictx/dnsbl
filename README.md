@@ -24,3 +24,7 @@ $ dig 157.20.74.45.bl.spamcop.net
 ```
 
 <https://cabulous.medium.com/dns-message-how-to-read-query-and-response-message-cfebcb4fe817>
+
+## bugs
+* if you get an error that the port is already in use, check if the avahi
+  daemon is running; use a different port, or shut down avahi.
