@@ -28,3 +28,6 @@ $ dig 157.20.74.45.bl.spamcop.net
 ## bugs
 * if you get an error that the port is already in use, check if the avahi
   daemon is running; use a different port, or shut down avahi.
+
+## design decisions
+* using 4/3/2/1/1.2.3.4/32 for paths, to allow for other netmasks
