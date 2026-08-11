@@ -38,13 +38,15 @@ def updatedb(source, netmask=None, message_id=None):
     logging.debug('appending to %s', path)
     with open(path, 'a', encoding='utf-8') as outfile:
         outfile.write(message_id or 'spam')
+    # update mtime of parent directory for dnsbl, in case no new files created
+    os.utime(os.path.dirname(path), None)
 
 def networks(octets, minbits=8, maxbits=30, sep='/'):
     '''
     construct all valid networks for the given address
 
     >>> networks([127, 0, 0, 1])
-    ['127.0.0.0/30', '127.0.0.0/29', '127.0.0.0/28', '127.0.0.0/27', '127.0.0.0/26', '127.0.0.0/25', '127.0.0.0/24', '127.0.0.0/23', '127.0.0.0/22', '127.0.0.0/21', '127.0.0.0/20', '127.0.0.0/19', '127.0.0.0/18', '127.0.0.0/17', '127.0.0.0/16', '127.0.0.0/15', '127.0.0.0/14', '127.0.0.0/13', '127.0.0.0/12', '127.0.0.0/11', '127.0.0.0/10', '127.0.0.0/9', '127.0.0.0/8']
+    ['127.0.0.0/30', '127.0.0.0/29', '127.0.0.0/28', '127.0.0.0/27', '127.0.0.0/26', '127.0.0.0/25', '127.0.0.0/24', '127.0.0.0/23', '127.0.0.0/22', '127.0.0.0/21', '127.0.0.0/20', '127.0.0.0/19', '127.0.0.0/18', '127.0.0.0/17', '127.0.0.0/16', '127.0.0.0/15', '127.0.0.0/14', '127.0.0.0/13', '127.0.0.0/12', '127.0.0.0/11', '127.0.0.0/10', '127.0.0.0/9', '127.0.0.0/8']  # pylint: disable=line-too-long
     '''
     result = [
         network(octets, bits, sep, True)
@@ -88,8 +90,7 @@ def network(octets, maskbits=32, sep='/', correct=False):
             logging.error('network address %s cannot have mask %s',
                           ipv4(reduced), ipv4(mask))
             return None
-        else:
-            reduced = reduced & mask
+        reduced = reduced & mask
     return sep.join([ipv4(reduced), str(maskbits)])
 
 def ipv4(netaddress):
