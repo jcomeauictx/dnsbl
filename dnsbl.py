@@ -12,7 +12,7 @@ else:
 COMMAND = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 DNSBL_DIRECTORY = os.getenv('DNSBL_DIRECTORY', DEFAULT_DIRECTORY)
 DNSBL_HOST = os.getenv('DNSBL_HOST', '::1')
-DNSBL_PORT = int(os.getenv('DNSBL_PORT', '5353'))
+DNSBL_PORT = int(os.getenv('DNSBL_PORT', '35353'))
 if COMMAND == 'doctest':
     DNSBL_DOMAIN = 'dnsbl'
 else:

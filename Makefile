@@ -1,11 +1,15 @@
 DNSBL_HOST ?= ::1
-DNSBL_PORT ?= 5353
+DNSBL_PORT ?= 35353
 DNSBL_DIRECTORY ?=
 WHICH ?= command -v
 PYLINT ?= $(word 1, $(shell $(WHICH) pylint pylint3 2>/dev/null))
 SOURCES := $(wildcard *.py)
 PYTHON ?= $(word 1, $(shell $(WHICH) python3 python 2>/dev/null))
+ifneq ($(SHOWENV),)
 export
+else
+export DNSBL_HOST DNSBL_PORT DNSBL_DIRECTORY
+endif
 default: test.spam run
 test:	dnsbl.py lint doctests
 	mkdir -p $(DNSBL_DIRECTORY)
@@ -30,3 +34,9 @@ lint: $(SOURCES:.py=.lint)
 tests doctests: $(SOURCES:.py=.doctest)
 run: dnsbl.py
 	python3 $<
+env:
+ifeq ($(SHOWENV),)
+	$(MAKE) SHOWENV=1 $@
+else
+	$@
+endif
